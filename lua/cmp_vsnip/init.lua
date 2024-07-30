@@ -24,6 +24,7 @@ source.complete = function(_, request, callback)
     completion_item.insertTextFormat = cmp.lsp.InsertTextFormat.Snippet
     completion_item.insertText = table.concat(user_data.vsnip.snippet, '\n')
     completion_item.kind = cmp.lsp.CompletionItemKind.Snippet
+		completion_item.description = item.description
     completion_item.data = {
       filetype = request.context.filetype,
       snippet = user_data.vsnip.snippet,
@@ -37,9 +38,16 @@ end
 source.resolve = function(_, completion_item, callback)
   local documentation = {}
   table.insert(documentation, string.format('```%s', completion_item.data.filetype))
+
+  if completion_item.description ~= nil then
+    table.insert(documentation, completion_item.description)
+		table.insert(documentation, '---')
+  end
+
   for _, line in ipairs(vim.split(vim.fn['vsnip#to_string'](completion_item.data.snippet), '\n')) do
     table.insert(documentation, line)
   end
+
   table.insert(documentation, '```')
 
   completion_item.documentation = {
